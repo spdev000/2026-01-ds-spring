@@ -1,14 +1,14 @@
 package ru.diasoft.otus.application01.service;
 
 import ru.diasoft.otus.application01.domain.Question;
-import ru.diasoft.otus.application01.domain.QuestionType;
+import ru.diasoft.otus.application01.domain.AnswerType;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import static ru.diasoft.otus.application01.domain.QuestionType.OPTIONS;
+import static ru.diasoft.otus.application01.domain.AnswerType.OPTIONS;
 import static ru.diasoft.otus.application01.util.ResourceUtils.readResourceAsLines;
 
 public class QuestionServiceImpl implements QuestionService {
@@ -55,7 +55,7 @@ public class QuestionServiceImpl implements QuestionService {
         }
 
         String text = stripQuotes(parts[0].trim());
-        QuestionType type = QuestionType.fromCode(Integer.parseInt(stripQuotes(parts[1].trim())));
+        AnswerType type = AnswerType.fromCode(Integer.parseInt(stripQuotes(parts[1].trim())));
         List<String> answers = Arrays.stream(parts[2].split(";"))
                 .map(answer -> stripQuotes(answer.trim()))
                 .collect(Collectors.toList());
