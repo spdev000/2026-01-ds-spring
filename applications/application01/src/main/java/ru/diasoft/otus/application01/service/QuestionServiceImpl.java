@@ -1,40 +1,78 @@
 package ru.diasoft.otus.application01.service;
 
-import ru.diasoft.otus.application01.domain.Question;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 import ru.diasoft.otus.application01.domain.AnswerType;
+import ru.diasoft.otus.application01.domain.Question;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import static ru.diasoft.otus.application01.domain.AnswerType.NUMBER;
 import static ru.diasoft.otus.application01.domain.AnswerType.OPTIONS;
 import static ru.diasoft.otus.application01.util.ResourceUtils.readResourceAsLines;
 
+@Service
 public class QuestionServiceImpl implements QuestionService {
 
-    private String questionsFileName;
+    private final String questionsFileName;
+    private final int countPasses;
 
-    public void setQuestionsFileName(String questionsFileName) {
+    public QuestionServiceImpl(@Value("${questionsFileName:bad.csv}") String questionsFileName,
+                               @Value("${countPasses:2}") int countPasses) {
         this.questionsFileName = questionsFileName;
-    }
-
-    public QuestionServiceImpl() {
+        this.countPasses = countPasses;
     }
 
     @Override
     public void procQuestion() {
         List<Question> questions = loadQuestions(questionsFileName);
-        AtomicInteger number = new AtomicInteger(1);
-        questions.forEach(question -> {
-                    String answer;
-                    if (question.getType() == OPTIONS) {
-                        answer = "options (" + String.join("; ", question.getAnswers()) + ")";
-                    } else
-                        answer = question.getAnswers().stream().findFirst().orElse("");
-                    System.out.printf("Question %d: '%s', answer: %s \n", number.getAndIncrement(), question.getText(), answer);
-                }
-        );
+        System.out.println("Take the five-question test.");
+        try (Scanner input = new Scanner(System.in)) {
+            System.out.print("Enter first name: ");
+            String nameStudent = input.nextLine().trim();
+            System.out.print("Enter last name: ");
+            nameStudent = nameStudent + " " + input.nextLine().trim();
+            System.out.printf("Student %s, answer the following questions:\n", nameStudent);
+
+            AtomicInteger number = new AtomicInteger(1);
+            AtomicInteger currPassed = new AtomicInteger();
+            questions.forEach(question -> {
+                        String answerOptions = "";
+                        String answerType;
+                        switch (question.getType()) {
+                            case NUMBER:
+                                answerType = "type a number";
+                                break;
+                            case OPTIONS:
+                                answerType = "type the option number 1.."+String.valueOf(question.getAnswerOptions().size());
+                                answerOptions = ". Answer options: [" + String.join("; ", question.getAnswerOptions()) + "]";
+                                break;
+                            case TEXT:
+                                answerType = "type the text";
+                                break;
+                            default:
+                                answerType = "";
+                                break;
+                        }
+                        ;
+                        System.out.printf("Question %d: '%s'%s. Your answer (%s): ", number.getAndIncrement(), question.getText(), answerOptions, answerType);
+                        String studentAnswer = input.nextLine().trim();
+                        if (question.getAnswer().equals(studentAnswer)) {
+                            currPassed.getAndIncrement();
+                        }
+                    }
+            );
+            String testResult = "failed";
+            if (currPassed.get() >= countPasses) {
+                testResult = "passed successfully";
+            }
+            System.out.printf("Test %s (%d correct answers)\n", testResult, currPassed.get());
+        }
     }
 
     private static List<Question> loadQuestions(String resourceName) {
@@ -49,18 +87,24 @@ public class QuestionServiceImpl implements QuestionService {
     }
 
     private static Question parseQuestion(String line) {
-        String[] parts = line.split(",", 3);
+        String[] parts = line.split(",");
         if (parts.length < 3) {
             throw new IllegalArgumentException("Invalid CSV string: " + line);
         }
 
         String text = stripQuotes(parts[0].trim());
         AnswerType type = AnswerType.fromCode(Integer.parseInt(stripQuotes(parts[1].trim())));
-        List<String> answers = Arrays.stream(parts[2].split(";"))
-                .map(answer -> stripQuotes(answer.trim()))
-                .collect(Collectors.toList());
+        String answer = stripQuotes(parts[2].trim());
+        List<String> answerOptions;
+        if (type == OPTIONS && parts.length >= 4) {
+            answerOptions = Arrays.stream(parts[3].split(";"))
+                    .map(answerOption -> stripQuotes(answerOption.trim()))
+                    .collect(Collectors.toList());
+        } else {
+            answerOptions = new ArrayList<>();
+        }
 
-        return new Question(text, type, answers);
+        return new Question(text, type, answer, answerOptions);
     }
 
     private static String stripQuotes(String value) {
