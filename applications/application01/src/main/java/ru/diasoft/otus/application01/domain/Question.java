@@ -8,12 +8,14 @@ import java.util.List;
 public class Question {
     private final String text;
     private final AnswerType type;
-    private final List<String> answers;
+    private final String answer;
+    private final List<String> answerOptions;
 
-    public Question(String text, AnswerType type, List<String> answers) {
+    public Question(String text, AnswerType type, String answer, List<String> answerOptions) {
         this.text = text;
         this.type = type;
-        this.answers = List.copyOf(answers);
+        this.answer = answer;
+        this.answerOptions = List.copyOf(answerOptions);
     }
 
 }
