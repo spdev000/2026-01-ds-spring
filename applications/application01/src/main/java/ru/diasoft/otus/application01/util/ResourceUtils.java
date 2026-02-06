@@ -31,30 +31,4 @@ public class ResourceUtils {
         return stream;
     }
 
-    public static String readResourceAsString(String path) {
-        try (InputStream stream = Thread.currentThread()
-                .getContextClassLoader()
-                .getResourceAsStream(path)) {
-
-            if (stream == null) {
-                throw new IOException("Resource not found: " + path);
-            }
-
-            return new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8))
-                    .lines()
-                    .collect(Collectors.joining("\n"));
-
-        } catch (IOException e) {
-            throw new UncheckedIOException("Failed to read resource: " + path, e);
-        }
-    }
-
-    public static List<List<String>> readCsvResource(String path) {
-        return readResourceAsLines(path).stream()
-                .filter(trim -> !trim.isBlank())
-                .map(String::trim)
-                .map(line -> Arrays.asList(line.split(",")))
-                .collect(Collectors.toList());
-    }
-
 }
