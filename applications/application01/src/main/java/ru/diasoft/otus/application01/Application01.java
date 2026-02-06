@@ -10,12 +10,12 @@ import ru.diasoft.otus.application01.service.QuestionService;
 public class Application01 {
 
     public static void main(String[] args) {
-        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Application01.class);
+        try (AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Application01.class)) {
 
-        QuestionService service = context.getBean(QuestionService.class);
+            QuestionService service = context.getBean(QuestionService.class);
 
-        service.procQuestion();
-
+            service.procQuestion();
+        }
     }
 
 }
