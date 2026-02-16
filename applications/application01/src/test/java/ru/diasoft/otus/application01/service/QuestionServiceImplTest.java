@@ -1,81 +1,65 @@
 package ru.diasoft.otus.application01.service;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockedStatic;
-import ru.diasoft.otus.application01.util.ResourceUtils;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import ru.diasoft.otus.application01.dao.QuestionDao;
+import ru.diasoft.otus.application01.domain.AnswerType;
+import ru.diasoft.otus.application01.domain.Question;
+import ru.diasoft.otus.application01.io.IOService;
 
-import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
+import static ru.diasoft.otus.application01.util.ResourceUtils.readResourceAsLines;
 
+@ExtendWith(MockitoExtension.class)
 class QuestionServiceImplTest {
 
-    private MockedStatic<ResourceUtils> mockedStatic;
-
-    @AfterEach
-    void tearDown() {
-        if (mockedStatic != null) {
-            mockedStatic.close();
-            mockedStatic = null;
-        }
-    }
+    @Mock
+    private QuestionDao questionDao;
+    @Mock
+    private IOService ioService;
 
     @Test
     void procQuestion_printsOptionsAndSingleAnswer() {
-        List<String> lines = List.of(
-                "Question,AnswerType,Answer",
-                "What is 2+2?,0,4,4",
-                "Choose colors,1,1,Red;Green;Blue"
+        List<String> studentAnswers = readResourceAsLines("answers.csv");
+
+        List<Question> testQuestions = List.of(
+                new Question("What is 2+2?", AnswerType.NUMBER, "4", List.of()),
+                new Question("Choose colors", AnswerType.OPTIONS, "1", List.of("Red", "Green", "Blue")),
+                new Question("What is the capital of France?", AnswerType.TEXT, "Paris", List.of())
         );
-        List<String> studentAnswers = List.of(
-                "Vasya",
-                "Pupkin",
-                "4",
-                "1"
-        );
+        when(questionDao.loadQuestions()).thenReturn(testQuestions);
+        when(ioService.readLine()).thenReturn(
+                studentAnswers.get(0),
+                studentAnswers.get(1),
+                studentAnswers.get(2),
+                studentAnswers.get(3),
+                studentAnswers.get(4));
 
-        mockedStatic = mockStatic(ResourceUtils.class);
-        mockedStatic.when(() -> ResourceUtils.readResourceAsLines("questions.csv")).thenReturn(lines);
-
-        QuestionServiceImpl svc = new QuestionServiceImpl("questions.csv", 1);
-
-        String input = String.join("\n", studentAnswers);
-        ByteArrayInputStream testIn = new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8));
-        InputStream originalIn = System.in;
-        System.setIn(new BufferedInputStream(testIn));
-
-        ByteArrayOutputStream testOut = new ByteArrayOutputStream();
-        PrintStream originalOut = System.out;
-        System.setOut(new PrintStream(testOut));
+        QuestionServiceImpl questionService = new QuestionServiceImpl(2, questionDao, ioService);
 
 
-        svc.procQuestion();
+        questionService.procQuestion();
 
 
-        System.setOut(originalOut);
-        System.setIn(originalIn);
-        String output = testOut.toString();
-        assertTrue(output.contains("Question 1: 'What is 2+2?'. Your answer:"));
-        assertTrue(output.contains("Question 2: 'Choose colors'. Answer options: [Red; Green; Blue], enter the option number. Your answer: Test passed successfully (2 correct answers)"));
+        verify(ioService, times(1)).printf("Take the %s questions test.\n", testQuestions.size());
+        verify(ioService, times(2)).print(anyString());
+        verify(ioService, times(5)).readLine();
+        verify(ioService, atLeastOnce()).printf(anyString(), any());
     }
 
     @Test
     void procQuestion_throwsOnInvalidCsvLine() {
-        List<String> lines = List.of(
-                "header",
-                "invalid_line_without_commas"
-        );
+        when(questionDao.loadQuestions()).thenThrow(new IllegalArgumentException("Invalid CSV string: invalid_line_without_commas"));
 
-        mockedStatic = mockStatic(ResourceUtils.class);
-        mockedStatic.when(() -> ResourceUtils.readResourceAsLines("bad.csv")).thenReturn(lines);
+        QuestionServiceImpl questionService = new QuestionServiceImpl(1, questionDao, ioService);
 
-        QuestionServiceImpl svc = new QuestionServiceImpl("bad.csv", 3);
-
-        Exception ex = assertThrows(IllegalArgumentException.class, svc::procQuestion);
+        Exception ex = assertThrows(IllegalArgumentException.class, questionService::procQuestion);
         assertTrue(ex.getMessage().contains("Invalid CSV string"));
     }
 }
