@@ -1,0 +1,17 @@
+${AnsiColor.BRIGHT_CYAN}
+                                 88
+                                 88
+                                 88
+,adPPYba,  8b,dPPYba,    ,adPPYb,88   ,adPPYba,  8b       d8
+I8[    ""  88P'    "8a  a8"    `Y88  a8P_____88  `8b     d8'
+ `"Y8ba,   88       d8  8b       88  8PP"""""""   `8b   d8'
+aa    ]8I  88b,   ,a8"  "8a,   ,d88  "8b,   ,aa    `8b,d8'
+`"YbbdP"'  88`YbbdP"'    `"8bbdP"Y8   `"Ybbd8"'      "8"
+           88
+           88
+${AnsiColor.BRIGHT_GREEN}${AnsiStyle.BOLD}${application.title}${AnsiStyle.NORMAL} ${AnsiColor.BRIGHT_YELLOW}v${application.version}${AnsiColor.DEFAULT}
+
+${AnsiColor.BRIGHT_BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${AnsiColor.DEFAULT}
+${AnsiColor.CYAN}Spring Boot:${AnsiColor.DEFAULT} ${spring-boot.version} ${AnsiColor.BRIGHT_BLACK}|${AnsiColor.DEFAULT} ${AnsiColor.CYAN}Java:${AnsiColor.DEFAULT} ${java.version}
+${AnsiColor.CYAN}Application:${AnsiColor.DEFAULT} ${application.formatted-version}
+${AnsiColor.BRIGHT_BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${AnsiColor.DEFAULT}

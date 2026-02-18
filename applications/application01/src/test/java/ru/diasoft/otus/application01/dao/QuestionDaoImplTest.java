@@ -1,21 +1,33 @@
 package ru.diasoft.otus.application01.dao;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.MockedStatic;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.MessageSource;
 import ru.diasoft.otus.application01.domain.Question;
 import ru.diasoft.otus.application01.util.ResourceUtils;
 
 import java.io.UncheckedIOException;
 import java.util.List;
+import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 class QuestionDaoImplTest {
 
     private MockedStatic<ResourceUtils> mockedStatic;
+
+    @Mock
+    MessageSource messageSource;
+
+    @InjectMocks
     QuestionDaoImpl questionDao;
 
     @AfterEach
@@ -38,7 +50,8 @@ class QuestionDaoImplTest {
         );
         mockedStatic = mockStatic(ResourceUtils.class);
         mockedStatic.when(() -> ResourceUtils.readResourceAsLines(resourceName)).thenReturn(questionLines);
-        questionDao = new QuestionDaoImpl(resourceName);
+        when(messageSource.getMessage(resourceName, null, resourceName, Locale.getDefault())).thenReturn(resourceName);
+        questionDao = new QuestionDaoImpl(resourceName, messageSource);
 
 
         List<Question> questions = questionDao.loadQuestions();
@@ -51,7 +64,8 @@ class QuestionDaoImplTest {
 
     @Test
     void testLoadQuestionsBad() {
-        questionDao = new QuestionDaoImpl("bad.csv");
+        when(messageSource.getMessage("bad.csv", null, "bad.csv", Locale.getDefault())).thenReturn("bad.csv");
+        questionDao = new QuestionDaoImpl("bad.csv", messageSource);
 
 
         Exception ex = assertThrows(UncheckedIOException.class, questionDao::loadQuestions);

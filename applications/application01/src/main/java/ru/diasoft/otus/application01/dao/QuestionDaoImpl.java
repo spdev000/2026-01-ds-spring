@@ -1,6 +1,7 @@
 package ru.diasoft.otus.application01.dao;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
 import ru.diasoft.otus.application01.domain.AnswerType;
 import ru.diasoft.otus.application01.domain.Question;
@@ -8,6 +9,7 @@ import ru.diasoft.otus.application01.domain.Question;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 import static ru.diasoft.otus.application01.domain.AnswerType.OPTIONS;
@@ -16,9 +18,11 @@ import static ru.diasoft.otus.application01.util.ResourceUtils.readResourceAsLin
 @Component
 public class QuestionDaoImpl implements QuestionDao {
     private final String questionsFileName;
+    private final MessageSource messageSource;
 
-    public QuestionDaoImpl(@Value("${questionsFileName:bad.csv}") String questionsFileName) {
-        this.questionsFileName = questionsFileName;
+    public QuestionDaoImpl(@Value("${questionsFileName:bad.csv}") String questionsFileName, MessageSource messageSource) {
+        this.messageSource = messageSource;
+        this.questionsFileName = messageSource.getMessage(questionsFileName, null, questionsFileName, Locale.getDefault());
     }
 
     private static List<Question> loadQuestions(String resourceName) {

@@ -1,6 +1,12 @@
 spring:
   application:
     name: application01
+  output:
+    ansi:
+      enabled: always
+  messages:
+    basename: i18n/messages
+    encoding: UTF-8
 
 questionsFileName: questions.csv
 countPasses: 3

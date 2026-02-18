@@ -7,15 +7,17 @@ import org.springframework.context.annotation.Bean;
 import ru.diasoft.otus.application01.service.QuestionService;
 
 @SpringBootApplication
-public class Application01 {
+public class Application01Application {
 
     public static void main(String[] args) {
-        SpringApplication.run(Application01.class, args);
+        SpringApplication.run(Application01Application.class, args);
     }
 
     @Bean
     public CommandLineRunner run(QuestionService service) {
-        return args -> service.procQuestion();
+        return args -> {
+            service.procQuestion();
+        };
     }
 
 }
