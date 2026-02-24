@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.MessageSource;
 import ru.diasoft.otus.application01.dao.QuestionDao;
 import ru.diasoft.otus.application01.domain.AnswerType;
 import ru.diasoft.otus.application01.domain.Question;
@@ -23,6 +24,8 @@ class QuestionServiceImplTest {
     private QuestionDao questionDao;
     @Mock
     private IOService ioService;
+    @Mock
+    private MessageSource messageSource;
 
     @Test
     void procQuestion_printsOptionsAndSingleAnswer() {
@@ -40,8 +43,9 @@ class QuestionServiceImplTest {
                 studentAnswers.get(2),
                 studentAnswers.get(3),
                 studentAnswers.get(4));
+        when(messageSource.getMessage(anyString(), any(), any(), any())).thenReturn("Take the %s questions test.\n");
 
-        QuestionServiceImpl questionService = new QuestionServiceImpl(2, questionDao, ioService);
+        QuestionServiceImpl questionService = new QuestionServiceImpl(2, questionDao, ioService, messageSource);
 
 
         questionService.procQuestion();
@@ -57,7 +61,7 @@ class QuestionServiceImplTest {
     void procQuestion_throwsOnInvalidCsvLine() {
         when(questionDao.loadQuestions()).thenThrow(new IllegalArgumentException("Invalid CSV string: invalid_line_without_commas"));
 
-        QuestionServiceImpl questionService = new QuestionServiceImpl(1, questionDao, ioService);
+        QuestionServiceImpl questionService = new QuestionServiceImpl(1, questionDao, ioService, messageSource);
 
         Exception ex = assertThrows(IllegalArgumentException.class, questionService::procQuestion);
         assertTrue(ex.getMessage().contains("Invalid CSV string"));
