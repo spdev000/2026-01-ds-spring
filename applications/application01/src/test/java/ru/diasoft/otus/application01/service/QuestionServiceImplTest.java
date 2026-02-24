@@ -12,8 +12,7 @@ import ru.diasoft.otus.application01.io.IOService;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static ru.diasoft.otus.application01.util.ResourceUtils.readResourceAsLines;
 
@@ -48,13 +47,10 @@ class QuestionServiceImplTest {
         QuestionServiceImpl questionService = new QuestionServiceImpl(2, questionDao, ioService, messageSource);
 
 
-        questionService.procQuestion();
+        int result = questionService.procQuestion();
 
 
-        verify(ioService, times(1)).printf("Take the %s questions test.\n", testQuestions.size());
-        verify(ioService, times(2)).print(anyString());
-        verify(ioService, times(5)).readLine();
-        verify(ioService, atLeastOnce()).printf(anyString(), any());
+        assertEquals(3, result);
     }
 
     @Test

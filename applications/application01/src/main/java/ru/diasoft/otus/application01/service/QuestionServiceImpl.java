@@ -29,7 +29,7 @@ public class QuestionServiceImpl implements QuestionService {
     }
 
     @Override
-    public void procQuestion() {
+    public int procQuestion() {
         List<Question> questions = questionDao.loadQuestions();
         ioService.printf(messageSource.getMessage("QuestionService.welcome", null, "Take the %s questions test.\n", Locale.getDefault()), questions.size());
         ioService.print(messageSource.getMessage("QuestionService.first", null,"Enter first name: ", Locale.getDefault()));
@@ -66,6 +66,8 @@ public class QuestionServiceImpl implements QuestionService {
             testResult = messageSource.getMessage("QuestionService.passed",null, "passed successfully", Locale.getDefault());
         }
         ioService.printf(messageSource.getMessage("QuestionService.test",null, "Test %s (%d correct answers)\n", Locale.getDefault()), testResult, currPassed.get());
+
+        return currPassed.get();
     }
 
 }
