@@ -13,11 +13,13 @@ public class Application01Application {
         SpringApplication.run(Application01Application.class, args);
     }
 
+/*
     @Bean
     public CommandLineRunner run(QuestionService service) {
         return args -> {
             service.procQuestion();
         };
     }
+*/
 
 }
